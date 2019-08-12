@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+  api:
+    depends_on:
+      - mongodb
+    build:
+      context: server
+    ports:
+      - 3000:3000
+    command: npm start
+  frontend:
+    depends_on:
+      - api
+    image: nginx
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    volumes:
+      - ./client/build:/usr/share/nginx/html:ro
+    ports:
+      - 8080:80
+  mongodb:
+    image: library/mongo:3.4
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=domino
+    ports:
+      - 27017:27017

@@ -1,0 +1,50 @@
+.piece {
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+  width: 40px;
+  height: 80px;
+  transform: translate(-50%, -50%);
+
+  background-color: whitesmoke;
+  border: 1px solid #c0c0c0;
+
+  &.on-board {
+    position: absolute;
+    display: block;
+
+    &.rotated {
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+    &.rotated.flipped {
+      transform: translate(-50%, -50%) rotate(270deg);
+    }
+    &.flipped {
+      transform: translate(-50%, -50%) rotate(180deg);
+    }
+  }
+  &.in-hand {
+    position: relative;
+    display: inline-block;
+
+    margin: 0 5px;
+
+    &.selected {
+      top: -10px;
+      box-shadow: 5px 10px 0 rgba(0,0,0,0.6);
+    }
+  }
+
+  & > div {
+    flex: 0 1 auto;
+    height: 50%;
+    text-align: center;
+    line-height: 2.5em;
+    vertical-align: middle;
+
+    &:first-child {
+      border-bottom: 1px dotted #aaa;
+    }
+  }
+}
