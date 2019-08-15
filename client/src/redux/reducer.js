@@ -9,7 +9,7 @@ import {
   SELECT_GAME,
   SELECT_PIECE,
   PIECES,
-  START_GAME
+  START_GAME, JOIN_GAME
 } from './constants';
 
 const games = (initial = fromJS([]), action) => {
@@ -43,6 +43,9 @@ const activeGame = (initial = fromJS({ isEmpty: true, game: null, selectedPiece:
       return initial.set('game', fromJS(game));
     }
     case START_GAME: {
+      return initial.set('game', fromJS(action.game));
+    }
+    case JOIN_GAME: {
       return initial.set('game', fromJS(action.game));
     }
     case CREATE_GAME: return initial;

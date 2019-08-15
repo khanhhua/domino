@@ -48,6 +48,10 @@ router.put('/sessions/:gameId', async (ctx) => {
   const { user: { userId: ownerId } } = ctx;
 
   const game = await Game.findOne({ _id: gameId, ownerId });
+  if (!game) {
+    return ctx.throw({ statusCode: 404, message: 'Game not found' });
+  }
+
   const stack = Object.values(PIECES).sort(() => (Math.random() - 0.5));
   const deals = game.playerIds.map((playerId, index) => {
     return {
@@ -55,7 +59,11 @@ router.put('/sessions/:gameId', async (ctx) => {
       deck: stack.slice(index * 7, index * 7 + 7).map(({ pieceId }) => pieceId),
     };
   });
-  await game.update({ status: 'playing', deals });
+  await game.update({
+    status: 'playing',
+    activePlayerId: ownerId, // OWNER privilege! :D
+    deals,
+  });
 
   ctx.status = 204;
 });
@@ -63,8 +71,12 @@ router.put('/sessions/:gameId', async (ctx) => {
 router.put('/players/:gameId', async (ctx) => {
   const { gameId } = ctx.params;
   const { user: { userId: playerId } } = ctx;
+  const game = await Game.findOne({ _id: gameId });
+  if (!(game.playerIds.length < 4)) {
+    return ctx.throw({ statusCode: 400, message: 'Too many players' });
+  }
 
-  await Game.updateOne({ _id: gameId }, { $push: { playerIds: playerId } });
+  await Game.updateOne({ _id: gameId }, { $addToSet: { playerIds: playerId } });
   ctx.status = 204;
 });
 
@@ -76,11 +88,21 @@ router.post('/pieces/:gameId', async (ctx) => {
 
   const piece = PIECES[pieceId];
   const game = await Game.findById(gameId);
+  if (!game) {
+    return ctx.throw({ statusCode: 404, message: 'Game not found' });
+  }
+  if (game.activePlayerId.toString() !== playerId) {
+    return ctx.throw({ statusCode: 400, message: 'Invalid turn' });
+  }
+  // TODO Check whether the pieceId belongs to Player or NOT
+
   const { pieces, end0, end1 } = game;
   const playerDeckIndex = game.deals.findIndex(({ playerId: key }) => key.toString() === playerId);
+  const nextActivePlayerId = (game.playerIds.findIndex(key => key.toString() === playerId) + 1) % game.playerIds.length;
 
   if (pieces.length === 0) {
     await game.update({
+      activePlayerId: game.playerIds[nextActivePlayerId],
       end0: piece.ends[0],
       end1: piece.ends[1],
       pieces: [{ pieceId, playerId, origin: piece.ends }],
@@ -91,6 +113,7 @@ router.post('/pieces/:gameId', async (ctx) => {
     if (end === end0) {
       const updatedEnd0 = piece.ends[index === 0 ? 1 : 0];
       await game.update({
+        activePlayerId: game.playerIds[nextActivePlayerId],
         end0: updatedEnd0,
         $push: { pieces: { pieceId, playerId, link: end, open: updatedEnd0 } },
         $pull: { [`deals.${playerDeckIndex}.deck`]: pieceId }
@@ -98,6 +121,7 @@ router.post('/pieces/:gameId', async (ctx) => {
     } else if (end === end1) {
       const updatedEnd1 = piece.ends[index === 1 ? 0 : 1];
       await game.update({
+        activePlayerId: game.playerIds[nextActivePlayerId],
         end1: updatedEnd1,
         $push: { pieces: { pieceId, playerId, link: end, open: updatedEnd1 } },
         $pull: { [`deals.${playerDeckIndex}.deck`]: pieceId }

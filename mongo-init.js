@@ -10,3 +10,13 @@ db.createUser(
       ]
     }
 );
+
+db.players.insert({
+  username: 'fatdev',
+  alias: 'fatdev'
+});
+
+db.players.insert({
+  username: 'maddev',
+  alias: 'maddev'
+});

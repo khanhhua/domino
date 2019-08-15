@@ -69,7 +69,6 @@ export const joinGame = async (gameId) => {
 
 export const startGame = async (gameId) => {
   await put(`http://localhost:9000/sessions/${gameId}`);
-  debugger
   const { game } = await get(`http://localhost:9000/games/${gameId}`);
   return game;
 };

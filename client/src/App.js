@@ -8,7 +8,7 @@ import Piece from './Piece';
 import './App.css';
 import Auth from './Auth';
 import GameList from './GameList';
-import { createGame, move, startGame } from './redux/actions';
+import { createGame, joinGame, move, startGame } from './redux/actions';
 
 function App(props) {
   const { dispatch, currentUser, activeGame }= props;
@@ -39,6 +39,13 @@ function App(props) {
               color="success"
               onClick={() => dispatch(startGame())}
             >START</Button>
+            }
+            {activeGame.getIn(['game', 'status']) === 'pending' &&
+            <Button
+              size="lg"
+              color="success"
+              onClick={() => dispatch(joinGame())}
+            >JOIN</Button>
             }
             {!activeGame.get('isEmpty') && activeGame.getIn(['game', 'status']) === 'playing' &&
             <Fragment>
