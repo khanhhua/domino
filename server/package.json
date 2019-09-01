@@ -16,7 +16,9 @@
     "koa-body": "^4.1.0",
     "koa-cors": "0.0.16",
     "koa-router": "^7.4.0",
-    "mongoose": "^5.6.9"
+    "koa-websocket": "^6.0.0",
+    "mongoose": "^5.6.9",
+    "uuid": "^3.3.3"
   },
   "babel": {
     "presets": [

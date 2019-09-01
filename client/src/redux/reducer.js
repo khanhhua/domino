@@ -9,7 +9,7 @@ import {
   SELECT_GAME,
   SELECT_PIECE,
   PIECES,
-  START_GAME, JOIN_GAME
+  START_GAME, JOIN_GAME, CONNECT_REALTIME, REFRESH_GAME
 } from './constants';
 
 const games = (initial = fromJS([]), action) => {
@@ -48,6 +48,9 @@ const activeGame = (initial = fromJS({ isEmpty: true, game: null, selectedPiece:
     case JOIN_GAME: {
       return initial.set('game', fromJS(action.game));
     }
+    case REFRESH_GAME: {
+      return initial.setIn(['game', 'pieces'], fromJS(action.game.pieces));
+    }
     case CREATE_GAME: return initial;
     case MOVE: return initial;
     default: return initial;
@@ -61,8 +64,12 @@ const currentUser = (initial = fromJS({ isConnected: false }), action) => {
 
   switch (action.type) {
     case LOGIN: {
-      return initial.set('isConnected', true)
-    };
+      return initial.set('isConnected', true);
+    }
+    case CONNECT_REALTIME: {
+      localStorage.setItem('app/subscriptionId', action.subscriptionId);
+      return initial.set('subscriptionId', action.subscriptionId);
+    }
     default: return initial;
   }
 };

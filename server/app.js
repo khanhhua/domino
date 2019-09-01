@@ -5,8 +5,9 @@ import jwt from 'jsonwebtoken';
 
 import GameRouter from './gameRouter';
 import AuthRouter from './authRouter';
+import SocketRouter from './socketRouter';
 
-const app = new Koa();
+const app = require('koa-websocket')(new Koa());
 
 app.use(koaCors({ origin: 'http://localhost:3000' }));
 app.use(async (ctx, next) => {
@@ -20,10 +21,12 @@ app.use(async (ctx, next) => {
 
   await next();
 });
+
 app.use(koaBody());
+SocketRouter(app);
 AuthRouter(app);
 GameRouter(app);
 
 export default (port) => {
-  app.listen(port, () => { console.log('Listening at 3000...') });
+  app.listen(port, () => { console.log(`Listening at ${port}...`) });
 };

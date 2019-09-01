@@ -1,4 +1,5 @@
 import 'whatwg-fetch';
+import { LKEY_SUBSCRIPTION_ID } from "./redux/constants";
 
 const request = async (uri, opts = {}) => {
   const token = localStorage.getItem('token');
@@ -10,10 +11,15 @@ const request = async (uri, opts = {}) => {
   if (token) {
     opts.headers['Authorization'] = `Bearer ${token}`;
   }
+  if (localStorage.getItem(LKEY_SUBSCRIPTION_ID)) {
+    opts.headers['x-domino-subscription-id'] = localStorage.getItem(LKEY_SUBSCRIPTION_ID);
+  }
 
   const res = await fetch(uri, opts);
   if (res.status === 204) {
     return;
+  } else if (res.status >= 400) {
+    throw new Error({ statusCode: res.status });
   }
   if (res.headers.get('content-type').match(/application\/json/)) {
     return res.json();
@@ -48,7 +54,12 @@ export const authorize = async (username) => {
     body: {
       username,
     },
-  })
+  });
+};
+
+export const subscribe = async () => {
+  const { subscriptionId } = await post('http://localhost:9000/ws');
+  return subscriptionId;
 };
 
 export const createGame = async () => {

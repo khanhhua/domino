@@ -1,6 +1,6 @@
 import KoaRouter from 'koa-router';
 import { PIECES } from './constants';
-import { Game } from "./models";
+import { Game } from './models';
 
 const router = new KoaRouter();
 
@@ -26,6 +26,9 @@ router.post('/games', async (ctx) => {
 
   ctx.status = 201;
   ctx.body = { game: game.toJSON() };
+
+  const subscriptionId = ctx.request.headers['x-domino-subscription-id'];
+  ctx.app.joinRoom(subscriptionId, game._id.toString());
 });
 
 router.get('/games/:gameId', async (ctx) => {
@@ -66,6 +69,8 @@ router.put('/sessions/:gameId', async (ctx) => {
   });
 
   ctx.status = 204;
+
+  ctx.app.broadcast({ gameId, status: 'playing' }, { gameId });
 });
 
 router.put('/players/:gameId', async (ctx) => {
@@ -78,6 +83,9 @@ router.put('/players/:gameId', async (ctx) => {
 
   await Game.updateOne({ _id: gameId }, { $addToSet: { playerIds: playerId } });
   ctx.status = 204;
+
+  const subscriptionId = ctx.request.headers['x-domino-subscription-id'];
+  ctx.app.joinRoom(subscriptionId, gameId);
 });
 
 router.post('/pieces/:gameId', async (ctx) => {
@@ -133,6 +141,12 @@ router.post('/pieces/:gameId', async (ctx) => {
   }
 
   ctx.status = 201;
+
+  const updatedGame = await Game.findById(gameId, 'pieces');
+  ctx.app.broadcast({
+    $type: 'game',
+    game: updatedGame,
+  }, { gameId });
 });
 
 router.get('/pieces/:gameId', async (ctx) => {

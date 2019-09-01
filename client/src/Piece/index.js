@@ -22,8 +22,18 @@ const Piece = (props) => {
       className={cx(...classNames)}
       style={{ left: x, top: y }}
     >
-      <div {...props.layout === 'on-board' ? { onClick: () => dispatch(move(end0))} : {} }>{end0}</div>
-      <div {...props.layout === 'on-board' ? { onClick: () => dispatch(move(end1))} : {} }>{end1}</div>
+      <div
+        className={cx(`spots-${end0}`)}
+        {...props.layout === 'on-board' ? { onClick: () => dispatch(move(end0))} : {} }
+      >
+        &nbsp;
+      </div>
+      <div
+        className={cx(`spots-${end1}`)}
+        {...props.layout === 'on-board' ? { onClick: () => dispatch(move(end1))} : {} }
+      >
+        &nbsp;
+      </div>
     </div>
   );
 };

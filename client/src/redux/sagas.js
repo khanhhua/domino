@@ -10,9 +10,9 @@ import {
   MOVE,
   SELECT_GAME,
   STATUS_PENDING,
-  STATUS_SUCCESS, SELECT_PIECE
+  STATUS_SUCCESS, SELECT_PIECE, CONNECT_REALTIME
 } from './constants';
-import { listGames } from './actions';
+import { listGames, refreshGame } from './actions';
 
 function filter(actionType) {
   return ({ type, status }) => type === actionType && status === STATUS_PENDING;
@@ -35,6 +35,7 @@ function* doLogin({ username, password }) {
   }
 
   yield doListGames();
+  yield put({ type: CONNECT_REALTIME, status: STATUS_PENDING });
 }
 
 function* doCreateGameAsActive() {
@@ -84,6 +85,34 @@ function* doStartGame() {
   yield put({ type: START_GAME, status: STATUS_SUCCESS, game });
 }
 
+function* doConnect() {
+  const subscriptionId = yield api.subscribe();
+  yield put({ type: CONNECT_REALTIME, status: STATUS_SUCCESS, subscriptionId });
+
+  const webSocket = new WebSocket(`ws://localhost:9000/ws/${subscriptionId}`);
+
+  yield new Promise((resolve) => {
+    webSocket.onopen = resolve;
+  });
+
+  while (true) {
+    const message = yield new Promise((resolve) => {
+      webSocket.onmessage = (rawMsg) => {
+        resolve(JSON.parse(rawMsg.data));
+      }
+    });
+    console.log({ message });
+    const { $type, ...param } = message;
+    switch ($type) {
+      case 'game': {
+        yield put(refreshGame(param.game));
+        break
+      }
+      default: break;
+    }
+  }
+}
+
 export default function* rootSaga() {
   yield takeLatest(filter(LOGIN), doLogin);
   yield takeLatest(filter(LIST_GAMES), doListGames);
@@ -92,4 +121,5 @@ export default function* rootSaga() {
   yield takeLatest(filter(JOIN_GAME), doJoinGame);
   yield takeLatest(filter(START_GAME), doStartGame);
   yield takeLatest(filter(MOVE), doMove);
+  yield takeLatest(filter(CONNECT_REALTIME), doConnect);
 }

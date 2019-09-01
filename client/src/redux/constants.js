@@ -2,6 +2,8 @@ export const STATUS_PENDING = 'pending';
 export const STATUS_SUCCESS = 'success';
 export const STATUS_ERROR = 'error';
 
+export const LKEY_SUBSCRIPTION_ID = 'app/subscriptionId';
+
 export const LOGIN = 'app/login';
 export const CREATE_GAME = 'app/create-game';
 export const JOIN_GAME = 'app/join-game';
@@ -10,6 +12,8 @@ export const MOVE = 'app/move';
 export const LIST_GAMES = 'app/list-games';
 export const SELECT_GAME = 'app/select-game';
 export const SELECT_PIECE = 'app/select-piece';
+export const CONNECT_REALTIME = 'app/connect-realtime';
+export const REFRESH_GAME = 'app/refresh-game';
 
 export const PIECE_ID_00 = '00';
 export const PIECE_ID_10 = '10';

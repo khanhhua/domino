@@ -9,6 +9,7 @@ import {
   STATUS_SUCCESS,
   SELECT_PIECE,
   START_GAME,
+  REFRESH_GAME,
 } from './constants';
 
 export const login = (username, password) => ({ type: LOGIN, status: STATUS_PENDING, username, password });
@@ -19,3 +20,4 @@ export const startGame = () => ({ type: START_GAME, status: STATUS_PENDING });
 export const listGames = () => ({ type: LIST_GAMES, status: STATUS_PENDING });
 export const selectGame = (gameId) => ({ type: SELECT_GAME, status: STATUS_PENDING, gameId });
 export const selectPiece = (pieceId) => ({ type: SELECT_PIECE, status: STATUS_SUCCESS, pieceId });
+export const refreshGame = (game) => ({ type: REFRESH_GAME, status: STATUS_SUCCESS, game });
